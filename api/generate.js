@@ -1,10 +1,10 @@
 export default async function handler(req, res) {
+    // Настройка доступа для Roblox
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') return res.status(200).end();
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Только POST' });
 
     try {
         const { prompt } = req.body;
@@ -18,25 +18,15 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 model: "llama3-70b-8192",
                 messages: [
-                    { 
-                        role: "system", 
-                        content: "Ты — элитный разработчик Roblox Luau. Пиши только чистый код. Используй современные стандарты (task.wait, task.spawn, строгое типизирование). Не пиши пояснений, только код и краткие комментарии." 
-                    },
+                    { role: "system", content: "Ты - эксперт по Roblox Luau. Пиши только чистый код. Без лишних слов." },
                     { role: "user", content: prompt }
-                ],
-                temperature: 0.2
+                ]
             })
         });
 
         const data = await response.json();
-        
-        if (data.choices && data.choices[0]) {
-            return res.status(200).json({ code: data.choices[0].message.content });
-        } else {
-            throw new Error("Ошибка API Groq");
-        }
-
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
+        res.status(200).json({ code: data.choices[0].message.content });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 }
